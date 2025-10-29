@@ -57,7 +57,7 @@ canvas {
 #controls input[type="range"] {
   height: 6px;
   cursor: pointer;
-  accent-color: var(--primary-color); /* soft blue slider */
+  accent-color: var(--primary-color);
 }
 
 #controls button {

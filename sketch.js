@@ -3,7 +3,7 @@ let intermediate_tower_count = 2;
 let tower_count = intermediate_tower_count + 2;
 let disk_count = 7;
 let tower_height = 300;
-let animation_speed = 4;
+let animation_speed = 10;
 
 //solver
 async function recursiveHanoi(n, initial, target) {
