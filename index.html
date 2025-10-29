@@ -2,17 +2,93 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Sketch</title>
 
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="style.css" />
 
     <script src="libraries/p5.min.js"></script>
     <script src="libraries/p5.sound.min.js"></script>
   </head>
 
   <body>
+    <div id="header">
+      <h1>Tower of Hanoi Visualizer</h1>
+      <p class="sub">An Interactive Simulation of the Tower of Hanoi Problem</p>
+    </div>
+
     <script src="sketch.js"></script>
+    <div id="controls">
+      <p>Move Count: <span id="count">0</span></p>
+      <label for="disk_count">Disks:</label>
+      <div class="input-group">
+        <button
+          class="decrement"
+          onclick="setDiskCount(parseInt(diskCountInput.value) - 1);"
+        >
+          -
+        </button>
+        <input id="disk_count" type="number" value="10" min="2" max="14" />
+        <button
+          class="increment"
+          onclick="setDiskCount(parseInt(diskCountInput.value) + 1);"
+        >
+          +
+        </button>
+      </div>
+      <label for="animation_speed"
+        >Animation Speed: <span id="animation_speed_value">0</span></label
+      >
+      <input id="animation_speed" type="range" value="3" min="1" max="1000" />
+
+      <label for="tower_count">Towers:</label>
+      <input id="tower_count" type="number" value="3" min="2" max="7" />
+      <script></script>
+      <button id="solve" onclick="solve()">Solve</button>
+      <button id="solve" onclick="reset()">Reset</button>
+    </div>
+    <script>
+      const diskCountInput = document.getElementById("disk_count");
+      const animationSpeedInput = document.getElementById("animation_speed");
+      const towerCountInput = document.getElementById("tower_count");
+
+      window.addEventListener("load", () => {
+        diskCountInput.value = disk_count;
+        animationSpeedInput.value = animation_speed;
+        towerCountInput.value = intermediate_tower_count + 2;
+        document.getElementById("animation_speed_value").innerHTML =
+          animation_speed;
+      });
+
+      diskCountInput.addEventListener("input", () => {
+        disk_count = parseInt(diskCountInput.value);
+        reset();
+      });
+
+      animationSpeedInput.addEventListener("input", () => {
+        animation_speed = parseInt(animationSpeedInput.value);
+        document.getElementById("animation_speed_value").innerHTML =
+          animation_speed;
+      });
+
+      towerCountInput.addEventListener("input", () => {
+        intermediate_tower_count = parseInt(towerCountInput.value) - 2;
+        reset();
+      });
+      function setMoveCount(count) {
+        document.getElementById("count").innerHTML = count;
+      }
+      function incrementMoveCount() {
+        setMoveCount(parseInt(document.getElementById("count").innerHTML) + 1);
+      }
+      function setDiskCount(count) {
+        if (count < 2) count = 2;
+        if (count > 14) count = 14;
+        diskCountInput.value = count;
+        disk_count = count;
+        reset();
+      }
+    </script>
   </body>
 </html>

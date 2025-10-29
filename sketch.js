@@ -1,123 +1,43 @@
 let towers = [];
-let intermediate_tower_count = 1;
+let intermediate_tower_count = 2;
 let tower_count = intermediate_tower_count + 2;
-let disk_count = 10;
+let disk_count = 7;
 let tower_height = 300;
-let Animation_Delay = 20;
-let tower_gap;
-function randomColor() {
-  //random colors
-  return color(random(150, 240), random(200, 240), random(200, 240));
-}
-class Tower {
-  width = 20;
-  disks = [];
-  x = 0;
-  beam_height = 20;
-  beam_width = 200;
-  constructor(index) {
-    this.index = index;
-    this.x = (width / tower_count) * index + this.width / 2 + 200;
-  }
-  draw(x) {
-    x = x || this.x;
-    fill("black");
-    let y = height - tower_height;
-    rect(x, y - this.beam_height, this.width, tower_height, 20, 20, 0, 0);
-    //lower beam
-    rect(
-      x - this.beam_width / 2 + this.width / 2,
-      height - this.beam_height,
-      this.beam_width,
-      this.beam_height,
-      20,
-      20,
-      0,
-      0
-    );
-    //drawing the disk
-    for (let i = 0; i < this.disks.length; i++) {
-      const disk = this.disks[i];
-      disk.draw();
-    }
-  }
-  addDisk(disk) {
-    // check if the disk is bigger than the last disk
-    if (
-      this.disks.length > 0 &&
-      this.disks[this.disks.length - 1].size < disk.size
-    ) {
-      return;
-    }
-    disk.x = this.x - disk.getSize() / 2 + this.width / 2;
-    disk.y = height - disk.height * (this.disks.length + 1) - this.beam_height;
-    this.beam_width = max(this.beam_width, disk.getSize() + 10);
-    tower_height = max(
-      tower_height,
-      this.beam_height + disk.height * (this.disks.length + 1)
-    );
-    this.disks.push(disk);
-  }
-  async moveDisk(index, tower) {
-    await this.animate(index, tower);
-    tower.addDisk(this.disks[this.disks.length - 1]);
-  }
-  async animate(index, tower) {
-    let disk = this.disks[this.disks.length - 1];
-    let diskX = this.width / 2 - disk.getSize() / 2;
-    let diskY = height - disk.y - this.beam_height;
-    //move out of the tower
-    for (let i = diskY; i >= height - tower_height - 100; i--) {
-      await sleep(Animation_Delay);
-      disk.y = i;
-      disk.draw();
-    }
-    //move to side
-    let increment = 5;
-    if (this.x > tower.x) {
-      increment = -1;
-    }
-    for (
-      let i = this.x;
-      i <= (increment > 0 ? 1 : -1) * tower.x + disk.getSize() / 2;
-      i += increment
-    ) {
-      await sleep(Animation_Delay);
-      print(disk.x);
-      disk.x = i;
-      disk.draw();
-    }
-    //move down
-    for (
-      let i = height - tower_height - 100;
-      i <= tower.y - disk.height / 2;
-      i++
-    ) {
-      await sleep(Animation_Delay);
-      disk.y = i;
-      disk.draw();
-    }
-    //move to tower
-    for (
-      let i = tower.x - disk.getSize() / 2;
-      i <= tower.x + disk.getSize() / 2;
-      i++
-    ) {
-      await sleep(Animation_Delay);
-      disk.x = i;
-      disk.draw();
-    }
-    this.disks.pop();
-  }
+let animation_speed = 4;
 
-  removeDisk() {
-    return this.disks.pop();
+//solver
+async function recursiveHanoi(n, initial, target) {
+  if (n > 0) {
+    let best = getBestTower(initial, target);
+    await recursiveHanoi(n - 1, initial, best);
+    await initial.moveDisk(target);
+    incrementMoveCount();
+    await recursiveHanoi(n - 1, best, target);
+  }
+}
+function getBestTower(initial, target) {
+  let best = null;
+  for (let i = 0; i < tower_count; i++) {
+    if (i != initial.index && i != target.index) {
+      if (best == null || towers[i].disks.length < towers[best].disks.length) {
+        best = i;
+      }
+    }
+  }
+  return towers[best];
+}
+function reset() {
+  towers = [];
+  tower_count = intermediate_tower_count + 2;
+  tower_height = 300;
+  for (let i = 0; i < tower_count; i++) {
+    towers.push(new Tower(i));
+  }
+  for (let i = disk_count + 1; i > 1; i--) {
+    towers[0].addDisk(new Disk(i));
   }
 }
 
-function sleep(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
 class Disk {
   height = 40;
   x = 0;
@@ -129,12 +49,118 @@ class Disk {
   getSize() {
     return this.size * 30;
   }
-  draw(x, y) {
-    x = x || this.x;
-    y = y || this.y;
+  draw() {
     fill(this.color);
-    rect(x, y, this.getSize(), this.height, 20);
+    rect(this.x, this.y, this.getSize(), this.height, 20);
   }
+}
+function randomColor() {
+  //random colors
+  return color(random(0, 10), random(100, 130), random(180, 230));
+}
+class Tower {
+  width = 20;
+  disks = [];
+  x = 0;
+  y = 0;
+  beam_height = 20;
+  beam_width = 200;
+  constructor(index) {
+    this.index = index;
+    let block = width / tower_count;
+    this.x = block * (index + 1) - block / 2;
+  }
+  draw() {
+    noStroke();
+    fill(1, 0, 20);
+    let y = height - tower_height - this.beam_height;
+    rect(this.x, y, this.width, tower_height, 20, 20, 0, 0);
+    //lower beam
+    rect(
+      this.x - this.beam_width / 2 + this.width / 2,
+      height - this.beam_height,
+      this.beam_width,
+      this.beam_height,
+      20,
+      20,
+      0,
+      0
+    );
+    stroke(0);
+  }
+  drawDisks() {
+    //drawing the disk
+    for (let i = 0; i < this.disks.length; i++) {
+      const disk = this.disks[i];
+      disk.draw();
+    }
+  }
+  postion_of_next_disk(disk) {
+    let x = this.x - disk.getSize() / 2 + this.width / 2;
+    let y = height - disk.height * (this.disks.length + 1) - this.beam_height;
+    return [x, y];
+  }
+  addDisk(disk) {
+    // check if the disk is bigger than the last disk
+    if (
+      this.disks.length > 0 &&
+      this.disks[this.disks.length - 1].size < disk.size
+    ) {
+      alert("Invalid move");
+      return;
+    }
+    // adding the disk position
+    [disk.x, disk.y] = this.postion_of_next_disk(disk);
+
+    // update the beam width
+    this.beam_width = max(this.beam_width, disk.getSize() + 30);
+
+    //update the tower height
+    tower_height = max(
+      tower_height,
+      this.beam_height + disk.height * (this.disks.length + 1)
+    );
+    //adding the disk
+    this.disks.push(disk);
+  }
+  topDisk() {
+    return this.disks[this.disks.length - 1];
+  }
+  removeDisk() {
+    return this.disks.pop();
+  }
+  async moveDisk(tower) {
+    let disk = this.topDisk();
+    const lift_distance = 100;
+    //move out of the tower
+    for (let i = disk.y; i >= height - tower_height - lift_distance; i -= 1) {
+      disk.y = i;
+      if (i % animation_speed == 0) await sleep();
+    }
+    //move to tower
+    for (
+      let i = disk.x;
+      Math.abs(i - Math.floor(tower.x - disk.getSize() / 2)) > 2;
+      i += this.x < tower.x ? 1 : -1
+    ) {
+      disk.x = i;
+      if (i % animation_speed == 0) await sleep();
+    }
+    //move down
+    let desired_y;
+    [disk.x, desired_y] = tower.postion_of_next_disk(disk);
+    for (let i = disk.y; i <= desired_y; i++) {
+      disk.y = i;
+      if (i % animation_speed == 0) await sleep();
+    }
+
+    this.removeDisk();
+    tower.addDisk(disk);
+  }
+}
+
+async function sleep() {
+  return new Promise((resolve) => setTimeout(resolve, 10));
 }
 
 function setup() {
@@ -143,22 +169,42 @@ function setup() {
   for (let i = 0; i < tower_count; i++) {
     towers.push(new Tower(i));
   }
-  for (let i = disk_count + 2; i >= 2; i--) {
+  for (let i = disk_count + 1; i > 1; i--) {
     towers[0].addDisk(new Disk(i));
   }
 }
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  //resize towers
+  for (let i = 0; i < tower_count; i++) {
+    towers[i].x = (width / tower_count) * (i + 1) - width / tower_count / 2;
+  }
+  //repostion disks
+  for (let i = 0; i < tower_count; i++) {
+    let temp = [];
+    let disks_count = towers[i].disks.length;
+    for (let j = 0; j < disks_count; j++) {
+      temp.push(towers[i].removeDisk());
+    }
+    for (let j = 0; j < disks_count; j++) {
+      towers[i].addDisk(temp.pop());
+    }
+  }
 }
 let flag = true;
 function draw() {
   background(255);
-  for (let i = 0; i < tower_count; i++) {
-    const tower = towers[i];
+  towers.forEach((tower) => {
     tower.draw();
-  }
-  if (flag) {
-    towers[0].moveDisk(1, towers[1]);
-    flag = false;
-  }
+  });
+  towers.forEach((tower) => {
+    tower.drawDisks();
+  });
+}
+
+//HTML Calls
+
+async function solve() {
+  setMoveCount(0);
+  await recursiveHanoi(disk_count, towers[0], towers[1], towers[2]);
 }
