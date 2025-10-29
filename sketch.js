@@ -1,7 +1,7 @@
 let towers = [];
-let intermediate_tower_count = 2;
+let intermediate_tower_count = 1;
 let tower_count = intermediate_tower_count + 2;
-let disk_count = 7;
+let disk_count = 6;
 let tower_height = 300;
 let animation_speed = 10;
 
@@ -56,7 +56,7 @@ class Disk {
 }
 function randomColor() {
   //random colors
-  return color(random(0, 10), random(100, 130), random(180, 230));
+  return color(random(0, 10), random(100, 130), random(180, 230), 200);
 }
 class Tower {
   width = 20;
@@ -206,5 +206,5 @@ function draw() {
 
 async function solve() {
   setMoveCount(0);
-  await recursiveHanoi(disk_count, towers[0], towers[1], towers[2]);
+  await recursiveHanoi(disk_count, towers[0], towers[1]);
 }
