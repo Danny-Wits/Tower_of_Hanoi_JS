@@ -3,40 +3,120 @@ let intermediate_tower_count = 1;
 let tower_count = intermediate_tower_count + 2;
 let disk_count = 6;
 let tower_height = 300;
-let animation_speed = 4;
-
-//solver
-async function recursiveHanoi(n, initial, target) {
-  if (n > 0) {
-    let best = getBestTower(initial, target);
-    await recursiveHanoi(n - 1, initial, best);
-    await initial.moveDisk(target);
-    incrementMoveCount();
-    await recursiveHanoi(n - 1, best, target);
+let tower_width = innerWidth > 600 ? 20 : 15;
+let animation_speed = 20;
+let best_r = 2;
+let audio_enabled = false;
+let pause_enabled = true;
+let audio;
+let disk_multiplier = innerWidth > 600 ? 30 : 20;
+//audio
+function preload() {
+  audio = loadSound("move.mp3");
+}
+function playAudio() {
+  if (
+    audio.isLoaded() &&
+    !audio.isPlaying() &&
+    audio_enabled &&
+    animation_speed < 100
+  ) {
+    audio.play();
   }
 }
-function getBestTower(initial, target) {
+
+//solver functions
+async function recursiveHanoiForThree(n, initial, target, intermediate) {
+  let pause = pause_enabled && tower_count == 3 && n == disk_count;
+  if (n > 0) {
+    await recursiveHanoiForThree(n - 1, initial, intermediate, target);
+    if (pause) {
+      await sleep(1000);
+    }
+
+    await initial.moveDisk(target);
+    incrementMoveCount();
+    if (pause) {
+      await sleep(1000);
+    }
+    await recursiveHanoiForThree(n - 1, intermediate, target, initial);
+  }
+}
+
+async function optimalFrameStewartHolistic(n, initial, target, ptowers) {
+  if (n == 0) return;
+  if (n == 1) {
+    incrementMoveCount();
+    await initial.moveDisk(target);
+    return;
+  }
+  let k = ptowers.length;
+
+  if (k == 3) {
+    await recursiveHanoiForThree(
+      n,
+      initial,
+      target,
+      getFreeTower(initial, target, ptowers)
+    );
+    return;
+  }
+  FrameStewartHelper(n, k);
+  const r = best_r;
+  const aux = getFreeTower(initial, target, ptowers);
+  print(`r=${r}, aux=${aux.index}`);
+
+  await optimalFrameStewartHolistic(r, initial, aux, ptowers);
+  if (pause_enabled && n == disk_count) await sleep(1000);
+  const reduced_towers = ptowers.filter((tower) => tower.index !== aux.index);
+
+  await optimalFrameStewartHolistic(n - r, initial, target, reduced_towers);
+
+  if (pause_enabled && n == disk_count) await sleep(1000);
+  await optimalFrameStewartHolistic(r, aux, target, ptowers);
+}
+
+function FrameStewartHelper(n, k) {
+  if (n in [0, 1]) return n;
+  if (k == 3) return Math.pow(2, n) - 1;
+  let best = Infinity;
+  for (let r = 1; r < n; r++) {
+    let moves = 2 * FrameStewartHelper(r, k) + FrameStewartHelper(n - r, k - 1);
+    if (moves < best) {
+      best = moves;
+      best_r = r;
+    }
+  }
+  return best;
+}
+function getFreeTower(initial, target, ptowers) {
   let best = null;
-  for (let i = 0; i < tower_count; i++) {
-    if (i !== initial.index && i !== target.index) {
-      if (best == null || towers[i].disks.length < towers[best].disks.length) {
+  for (let i = 0; i < ptowers.length; i++) {
+    let current = ptowers[i];
+    if (current.index !== initial.index && current.index !== target.index) {
+      if (best == null || current.disks.length < ptowers[best].disks.length) {
         best = i;
       }
     }
   }
-  return towers[best];
+  return ptowers[best];
 }
 function reset() {
   setMoveCount(0);
   towers = [];
   tower_count = intermediate_tower_count + 2;
   tower_height = 300;
+  tower_width = innerWidth > 600 ? 20 : 15;
+  disk_multiplier = innerWidth > 600 ? 30 : 20;
+
   for (let i = 0; i < tower_count; i++) {
     towers.push(new Tower(i));
   }
   for (let i = disk_count + 1; i > 1; i--) {
     towers[0].addDisk(new Disk(i));
   }
+  document.getElementById("audio").checked = false;
+  audio_enabled = false;
 }
 
 class Disk {
@@ -48,7 +128,7 @@ class Disk {
     this.color = randomColor();
   }
   getSize() {
-    return this.size * 30;
+    return this.size * disk_multiplier * (tower_count < 5 ? 1 : 0.7);
   }
   draw() {
     fill(this.color);
@@ -60,7 +140,7 @@ function randomColor() {
   return color(random(0, 10), random(100, 130), random(180, 230), 200);
 }
 class Tower {
-  width = 20;
+  width = tower_width;
   disks = [];
   x = 0;
   y = 0;
@@ -132,7 +212,10 @@ class Tower {
   }
   async moveDisk(tower) {
     let disk = this.topDisk();
+    let diskColor = disk.color;
+    disk.color = color(255, 0, 0, 150);
     const lift_distance = 100;
+    playAudio();
     //move out of the tower
     for (let i = disk.y; i >= height - tower_height - lift_distance; i -= 1) {
       disk.y = i;
@@ -144,7 +227,6 @@ class Tower {
       Math.abs(i - Math.floor(tower.x - disk.getSize() / 2)) > 1;
       i += this.x < tower.x ? 1 : -1
     ) {
-      print(Math.abs(i - Math.floor(tower.x - disk.getSize() / 2)));
       disk.x = i;
       if (Math.floor(i) % animation_speed == 0) await sleep();
     }
@@ -155,14 +237,15 @@ class Tower {
       disk.y = i;
       if (Math.floor(i) % animation_speed == 0) await sleep();
     }
-
     this.removeDisk();
     tower.addDisk(disk);
+    disk.color = diskColor;
+    audio.pause();
   }
 }
 
-async function sleep() {
-  return new Promise((resolve) => setTimeout(resolve, 10));
+async function sleep(time = 10) {
+  return new Promise((resolve) => setTimeout(resolve, time));
 }
 
 function setup() {
@@ -177,23 +260,9 @@ function setup() {
 }
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  //resize towers
-  for (let i = 0; i < tower_count; i++) {
-    towers[i].x = (width / tower_count) * (i + 1) - width / tower_count / 2;
-  }
-  //repostion disks
-  for (let i = 0; i < tower_count; i++) {
-    let temp = [];
-    let disks_count = towers[i].disks.length;
-    for (let j = 0; j < disks_count; j++) {
-      temp.push(towers[i].removeDisk());
-    }
-    for (let j = 0; j < disks_count; j++) {
-      towers[i].addDisk(temp.pop());
-    }
-  }
+  reset();
 }
-let flag = true;
+
 function draw() {
   background(255);
   towers.forEach((tower) => {
@@ -207,6 +276,14 @@ function draw() {
 //HTML Calls
 
 async function solve() {
+  reset();
   setMoveCount(0);
-  await recursiveHanoi(disk_count, towers[0], towers[1]);
+  //hiding controls
+  document.getElementById("controls").style.display = "none";
+  document.getElementById("toggle-btn").innerHTML = "&#9776;";
+  if (tower_count == 3) {
+    await recursiveHanoiForThree(disk_count, towers[0], towers[1], towers[2]);
+    return;
+  }
+  await optimalFrameStewartHolistic(disk_count, towers[0], towers[1], towers);
 }

@@ -4,10 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Sketch</title>
-
+    <title>Hanoi and Frame–Stewart</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
-
+    <link rel="icon" href="icon.png" />
     <script src="libraries/p5.min.js"></script>
     <script src="libraries/p5.sound.min.js"></script>
   </head>
@@ -19,6 +18,8 @@
     </div>
 
     <script src="sketch.js"></script>
+    <button id="toggle-btn" onclick="toggleControls()">&#10005;</button>
+
     <div id="controls">
       <p>Move Count: <span id="count">0</span></p>
       <label for="disk_count">Disks:</label>
@@ -37,16 +38,39 @@
           +
         </button>
       </div>
+
+      <label for="disk_count">Towers:</label>
+
+      <div class="input-group">
+        <button
+          class="decrement"
+          onclick="setTowerCount(parseInt(towerCountInput.value) - 1);"
+        >
+          -
+        </button>
+        <input id="tower_count" type="number" value="3" min="3" max="10" />
+        <button
+          class="increment"
+          onclick="setTowerCount(parseInt(towerCountInput.value) + 1);"
+        >
+          +
+        </button>
+      </div>
+      <div class="audio-control">
+        <span>Audio:</span>
+        <input id="audio" type="checkbox" onchange="toggleAudio()" />
+        <span>Pause:</span>
+        <input id="pause" type="checkbox" onchange="togglePause()" checked />
+      </div>
+      <h5>Algorithm used</h5>
+      <p id="algorithm-description">Classic 3-peg algorithm</p>
+
       <label for="animation_speed"
         >Animation Speed: <span id="animation_speed_value">0</span></label
       >
       <input id="animation_speed" type="range" value="3" min="1" max="700" />
-
-      <label for="tower_count">Towers:</label>
-      <input id="tower_count" type="number" value="3" min="3" max="7" />
-      <script></script>
-      <button id="solve" onclick="solve()">Solve</button>
-      <button id="solve" onclick="reset()">Reset</button>
+      <button onclick="solve()">Solve</button>
+      <button onclick="reset()">Reset</button>
     </div>
     <script>
       const diskCountInput = document.getElementById("disk_count");
@@ -88,6 +112,40 @@
         diskCountInput.value = count;
         disk_count = count;
         reset();
+      }
+      function setTowerCount(count) {
+        if (count < 3) count = 3;
+        if (count > 10) count = 10;
+        const algorithmDescription = document.getElementById(
+          "algorithm-description"
+        );
+        if (count == 3) {
+          algorithmDescription.innerHTML = "Classic 3-peg algorithm";
+        } else {
+          algorithmDescription.innerHTML = "Frame-Stewart algorithm";
+        }
+        towerCountInput.value = count;
+        intermediate_tower_count = count - 2;
+        reset();
+      }
+      function toggleAudio() {
+        const audio = document.getElementById("audio");
+        audio_enabled = audio.checked;
+      }
+      function togglePause() {
+        const pause = document.getElementById("pause");
+        pause_enabled = pause.checked;
+      }
+      function toggleControls() {
+        const toggleBtn = document.getElementById("toggle-btn");
+        const controls = document.getElementById("controls");
+        if (controls.style.display === "none") {
+          controls.style.display = "block";
+          toggleBtn.innerHTML = "&#10005;";
+        } else {
+          controls.style.display = "none";
+          toggleBtn.innerHTML = "&#9776;";
+        }
       }
     </script>
   </body>

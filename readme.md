@@ -1,37 +1,34 @@
-# Tower of Hanoi Visualizer 🎨
+# Tower of Hanoi Visualizer
 
 ## Overview
 
 This project is an **interactive Tower of Hanoi Visualizer** built using **p5.js**.
-It demonstrates the classic recursive algorithm and visually shows how disks are moved between towers to solve the puzzle.
+It demonstrates both the **classic 3-peg recursive algorithm** and the **Frame–Stewart algorithm** for multiple pegs, providing a visual and educational experience of how disks are moved step-by-step to solve the puzzle.
 
 ## Features
 
-* Built with **p5.js** for smooth graphics and animations
-* Adjustable number of disks and towers
-* Customizable animation speed
-* Move counter display
-* Simple and clean UI with light theme
+* Built with **p5.js** for smooth, real-time graphics and animations
+* Supports **both Classic (3-peg)** and **Frame–Stewart (multi-peg)** solutions
+* Adjustable **number of disks** and **tower count**
+* Customizable **animation speed**
+* **Move counter** to track progress
+* **Audio feedback** on each disk move for an engaging experience
+* Simple and clean **light-themed UI**
 
 ## Technologies Used
 
-* **HTML / CSS** – UI and layout
-* **p5.js** – Graphics and animation logic
-* **JavaScript (ES6)** – Recursive Tower of Hanoi algorithm
+* **HTML / CSS** – Interface and layout
+* **p5.js** – Graphics and rendering
+* **JavaScript (ES6)** – Core logic for recursive and Frame–Stewart algorithms
+* **Audio API** – For disk movement sound effects
 
 ## How to Run
 
 1. Clone or download this repository.
 2. Open `index.html` in your browser.
-3. Adjust disk count, speed, and tower count from the control panel.
-4. Click **Solve** to watch the algorithm in action.
+3. Adjust **disk count**, **speed**, and **tower count** using the control panel.
+4. Choose between **Classic** or **Frame–Stewart** mode.
+5. Click **Solve** to watch the puzzle come to life with sound and motion.
 
-## Future Enhancements
-
-* Add support for Frame–Stewart algorithm (multi-peg version)
-* Step-by-step explanation of recursion
-* Sound effects and improved visuals
-
----
 
 
