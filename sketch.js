@@ -3,7 +3,7 @@ let intermediate_tower_count = 1;
 let tower_count = intermediate_tower_count + 2;
 let disk_count = 6;
 let tower_height = 300;
-let animation_speed = 10;
+let animation_speed = 4;
 
 //solver
 async function recursiveHanoi(n, initial, target) {
@@ -135,23 +135,24 @@ class Tower {
     //move out of the tower
     for (let i = disk.y; i >= height - tower_height - lift_distance; i -= 1) {
       disk.y = i;
-      if (i % animation_speed == 0) await sleep();
+      if (Math.floor(i) % animation_speed == 0) await sleep();
     }
     //move to tower
     for (
       let i = disk.x;
-      Math.abs(i - Math.floor(tower.x - disk.getSize() / 2)) > 2;
+      Math.abs(i - Math.floor(tower.x - disk.getSize() / 2)) > 1;
       i += this.x < tower.x ? 1 : -1
     ) {
+      print(Math.abs(i - Math.floor(tower.x - disk.getSize() / 2)));
       disk.x = i;
-      if (i % animation_speed == 0) await sleep();
+      if (Math.floor(i) % animation_speed == 0) await sleep();
     }
     //move down
     let desired_y;
     [disk.x, desired_y] = tower.postion_of_next_disk(disk);
     for (let i = disk.y; i <= desired_y; i++) {
       disk.y = i;
-      if (i % animation_speed == 0) await sleep();
+      if (Math.floor(i) % animation_speed == 0) await sleep();
     }
 
     this.removeDisk();
