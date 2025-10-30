@@ -115,8 +115,6 @@ function reset() {
   for (let i = disk_count + 1; i > 1; i--) {
     towers[0].addDisk(new Disk(i));
   }
-  document.getElementById("audio").checked = false;
-  audio_enabled = false;
 }
 
 class Disk {
@@ -261,6 +259,8 @@ function setup() {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   reset();
+  document.getElementById("audio").checked = false;
+  audio_enabled = false;
 }
 
 function draw() {
