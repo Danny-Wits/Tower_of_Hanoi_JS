@@ -18,7 +18,7 @@ async function recursiveHanoi(n, initial, target) {
 function getBestTower(initial, target) {
   let best = null;
   for (let i = 0; i < tower_count; i++) {
-    if (i != initial.index && i != target.index) {
+    if (i !== initial.index && i !== target.index) {
       if (best == null || towers[i].disks.length < towers[best].disks.length) {
         best = i;
       }
@@ -27,6 +27,7 @@ function getBestTower(initial, target) {
   return towers[best];
 }
 function reset() {
+  setMoveCount(0);
   towers = [];
   tower_count = intermediate_tower_count + 2;
   tower_height = 300;
