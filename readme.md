@@ -6,7 +6,7 @@ This project is an **interactive Tower of Hanoi Visualizer** built using **p5.js
 It demonstrates both the **classic 3-peg recursive algorithm** and the **Frame–Stewart algorithm** for multiple pegs, providing a visual and educational experience of how disks are moved step-by-step to solve the puzzle.
 
 ## Live Link 
- - [Click here to visit the site]https://danny-wits.github.io/Tower_of_Hanoi_JS/
+ - [Click here to visit the site] (https://danny-wits.github.io/Tower_of_Hanoi_JS/)
 ## Features
 
 * Built with **p5.js** for smooth, real-time graphics and animations
