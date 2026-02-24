@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -15,6 +15,50 @@
     <div id="header">
       <h1>Tower of Hanoi Visualizer</h1>
       <p class="sub">An Interactive Simulation of the Tower of Hanoi Problem</p>
+      <p class="credits">
+        Presented by: Department of Computer Science, University of Jammu
+      </p>
+      <div class="formula-box">
+        <span class="formula-label">Recurrence:</span>
+        <code class="formula-text">T(n) = 2<sup>n</sup> - 1</code>
+        <p class="formula-sub">
+          Total moves for <span id="n-display">6</span> disks:
+          <b id="move-result">63</b>
+        </p>
+      </div>
+    </div>
+
+    <div id="timer-display">02:00</div>
+
+    <div id="rules-box">
+      <div class="rules-header" onclick="toggleRules()">
+        <h3>Rules of the Game</h3>
+        <button class="collapse-btn" id="collapse-btn">&#9660;</button>
+      </div>
+
+      <ul id="rules-list" class="hidden">
+        <li>Move only <b>one disk</b> at a time.</li>
+        <li>A <b>larger disk</b> cannot be placed on top of a smaller one.</li>
+        <li>Only the <b>top disk</b> from any tower can be moved.</li>
+      </ul>
+
+      <script>
+        function toggleRules() {
+          const rulesList = document.getElementById("rules-list");
+          const collapseBtn = document.getElementById("collapse-btn");
+
+          // Toggle the display class
+          if (rulesList.classList.contains("hidden")) {
+            rulesList.classList.remove("hidden");
+            rulesList.classList.add("show");
+            collapseBtn.classList.add("open"); // Flips the arrow
+          } else {
+            rulesList.classList.remove("show");
+            rulesList.classList.add("hidden");
+            collapseBtn.classList.remove("open"); // Resets the arrow
+          }
+        }
+      </script>
     </div>
 
     <script src="sketch.js"></script>
@@ -26,14 +70,14 @@
       <div class="input-group">
         <button
           class="decrement"
-          onclick="setDiskCount(parseInt(diskCountInput.value) - 1);"
+          onclick="setDiskCount(parseInt(diskCountInput.value) - 1)"
         >
           -
         </button>
-        <input id="disk_count" type="number" value="10" min="2" max="14" />
+        <input id="disk_count" type="number" value="10" min="2" max="64" />
         <button
           class="increment"
-          onclick="setDiskCount(parseInt(diskCountInput.value) + 1);"
+          onclick="setDiskCount(parseInt(diskCountInput.value) + 1)"
         >
           +
         </button>
@@ -44,14 +88,14 @@
       <div class="input-group">
         <button
           class="decrement"
-          onclick="setTowerCount(parseInt(towerCountInput.value) - 1);"
+          onclick="setTowerCount(parseInt(towerCountInput.value) - 1)"
         >
           -
         </button>
-        <input id="tower_count" type="number" value="3" min="3" max="10" />
+        <input id="tower_count" type="number" value="3" min="3" max="20" />
         <button
           class="increment"
-          onclick="setTowerCount(parseInt(towerCountInput.value) + 1);"
+          onclick="setTowerCount(parseInt(towerCountInput.value) + 1)"
         >
           +
         </button>
@@ -68,9 +112,35 @@
       <label for="animation_speed"
         >Animation Speed: <span id="animation_speed_value">0</span></label
       >
-      <input id="animation_speed" type="range" value="3" min="1" max="700" />
+      <input id="animation_speed" type="range" value="3" min="1" max="1000" />
       <button onclick="solve()">Solve</button>
       <button onclick="reset()">Reset</button>
+      <h5>Display Settings</h5>
+      <button id="hide-ui-btn" onclick="toggleUI()">Hide UI Elements</button>
+      <script>
+        function toggleUI() {
+          const header = document.getElementById("header");
+          const rules = document.getElementById("rules-box");
+          const hideBtn = document.getElementById("hide-ui-btn");
+
+          // These are the elements that will disappear
+          const uiElements = [header, rules];
+          const isCurrentlyHidden = header.classList.contains("ui-hidden");
+
+          uiElements.forEach((el) => {
+            if (isCurrentlyHidden) {
+              el.classList.remove("ui-hidden");
+            } else {
+              el.classList.add("ui-hidden");
+            }
+          });
+
+          // Update button text to reflect the current state
+          hideBtn.innerText = isCurrentlyHidden
+            ? "Hide UI Elements"
+            : "Show UI Elements";
+        }
+      </script>
     </div>
     <script>
       const diskCountInput = document.getElementById("disk_count");
@@ -108,16 +178,28 @@
       }
       function setDiskCount(count) {
         if (count < 2) count = 2;
-        if (count > 14) count = 14;
+        if (count > 64) count = 64;
+
         diskCountInput.value = count;
         disk_count = count;
+
+        // --- Update the Recurrence Display ---
+        const nDisplay = document.getElementById("n-display");
+        const moveResult = document.getElementById("move-result");
+
+        if (nDisplay && moveResult) {
+          nDisplay.innerText = count;
+          const totalMoves = BigInt(2) ** BigInt(count) - BigInt(1);
+          moveResult.innerText = totalMoves.toLocaleString();
+        }
+
         reset();
       }
       function setTowerCount(count) {
         if (count < 3) count = 3;
-        if (count > 10) count = 10;
+        if (count > 64) count = 64;
         const algorithmDescription = document.getElementById(
-          "algorithm-description"
+          "algorithm-description",
         );
         if (count == 3) {
           algorithmDescription.innerHTML = "Classic 3-peg algorithm";

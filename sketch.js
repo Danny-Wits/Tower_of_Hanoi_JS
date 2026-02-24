@@ -24,7 +24,60 @@ function playAudio() {
     audio.play();
   }
 }
+// Timer Logic
+let timeLeft = 0;
+let timerInterval = 1000;
 
+const SECONDS_PER_MOVE = 1;
+
+function updateTimerDisplay() {
+  const hours = Math.floor(timeLeft / 3600);
+  const minutes = Math.floor((timeLeft % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (timeLeft % 60).toString().padStart(2, "0");
+
+  if (hours > 0) {
+    document.getElementById("timer-display").innerText =
+      `${hours}:${minutes}:${seconds}`;
+  } else {
+    document.getElementById("timer-display").innerText =
+      `${minutes}:${seconds}`;
+  }
+
+  if (timeLeft <= 15 && timeLeft > 0) {
+    document.getElementById("timer-display").style.color = "red";
+    document.getElementById("timer-display").style.borderColor = "red";
+  } else {
+    document.getElementById("timer-display").style.color =
+      "var(--primary-color)";
+    document.getElementById("timer-display").style.borderColor =
+      "var(--primary-color)";
+  }
+}
+
+function startTimer() {
+  const optimalMoves = FrameStewartHelper(disk_count, tower_count);
+
+  timeLeft = Math.ceil(optimalMoves * SECONDS_PER_MOVE);
+}
+
+function decrementTimer() {
+  timeLeft--;
+  updateTimerDisplay();
+}
+
+function resetTimer() {
+  let optimalMoves = FrameStewartHelper(disk_count, tower_count);
+
+  timeLeft = Math.ceil(optimalMoves * SECONDS_PER_MOVE);
+
+  updateTimerDisplay();
+}
+
+window.addEventListener("load", () => {
+  resetTimer();
+});
 //solver functions
 async function recursiveHanoiForThree(n, initial, target, intermediate) {
   let pause = pause_enabled && tower_count == 3 && n == disk_count;
@@ -57,7 +110,7 @@ async function optimalFrameStewartHolistic(n, initial, target, ptowers) {
       n,
       initial,
       target,
-      getFreeTower(initial, target, ptowers)
+      getFreeTower(initial, target, ptowers),
     );
     return;
   }
@@ -103,6 +156,7 @@ function getFreeTower(initial, target, ptowers) {
 }
 function reset() {
   setMoveCount(0);
+  resetTimer();
   towers = [];
   tower_count = intermediate_tower_count + 2;
   tower_height = 300;
@@ -134,8 +188,16 @@ class Disk {
   }
 }
 function randomColor() {
-  //random colors
-  return color(random(0, 10), random(100, 130), random(180, 230), 200);
+  // Vibrant "Neon" palette: High saturation and brightness
+  const colors = [
+    color(255, 0, 127, 220), // Neon Pink
+    color(0, 255, 255, 220), // Cyan
+    color(57, 255, 20, 220), // Neon Green
+    color(255, 170, 0, 220), // Bright Orange
+    color(180, 0, 255, 220), // Electric Purple
+    color(255, 255, 0, 220), // Bright Yellow
+  ];
+  return random(colors);
 }
 class Tower {
   width = tower_width;
@@ -151,7 +213,7 @@ class Tower {
   }
   draw() {
     noStroke();
-    fill(1, 0, 20);
+    fill("#060101");
     let y = height - tower_height - this.beam_height;
     rect(this.x, y, this.width, tower_height, 20, 20, 0, 0);
     //lower beam
@@ -163,7 +225,7 @@ class Tower {
       20,
       20,
       0,
-      0
+      0,
     );
     stroke(0);
   }
@@ -197,7 +259,7 @@ class Tower {
     //update the tower height
     tower_height = max(
       tower_height,
-      this.beam_height + disk.height * (this.disks.length + 1)
+      this.beam_height + disk.height * (this.disks.length + 1),
     );
     //adding the disk
     this.disks.push(disk);
@@ -210,8 +272,6 @@ class Tower {
   }
   async moveDisk(tower) {
     let disk = this.topDisk();
-    let diskColor = disk.color;
-    disk.color = color(255, 0, 0, 150);
     const lift_distance = 100;
     playAudio();
     //move out of the tower
@@ -237,7 +297,7 @@ class Tower {
     }
     this.removeDisk();
     tower.addDisk(disk);
-    disk.color = diskColor;
+    decrementTimer();
     audio.pause();
   }
 }
@@ -264,7 +324,7 @@ function windowResized() {
 }
 
 function draw() {
-  background(255);
+  drawBackground();
   towers.forEach((tower) => {
     tower.draw();
   });
@@ -273,12 +333,26 @@ function draw() {
   });
 }
 
+function drawBackground() {
+  background(255); // Solid white base
+  // Draw the dotted grid
+  let dotSpacing = 20;
+  let dotSize = 3;
+  fill(220); // Light gray for the dots
+  noStroke();
+  for (let x = 0; x < width; x += dotSpacing) {
+    for (let y = 0; y < height; y += dotSpacing) {
+      circle(x, y, dotSize);
+    }
+  }
+}
+
 //HTML Calls
 
 async function solve() {
   reset();
   setMoveCount(0);
-  //hiding controls
+  startTimer();
   document.getElementById("controls").style.display = "none";
   document.getElementById("toggle-btn").innerHTML = "&#9776;";
   if (tower_count == 3) {
