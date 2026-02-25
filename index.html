@@ -25,10 +25,27 @@
           Total moves for <span id="n-display">6</span> disks:
           <b id="move-result">63</b>
         </p>
+
+        <p
+          class="universe-quote"
+          style="
+            font-size: 0.85em;
+            margin-top: 10px;
+            font-style: italic;
+            color: #555;
+          "
+        >
+          <strong>Fun Fact:</strong> Moving 64 disks at a rate of one per second
+          would take roughly 585 billion years to complete—long past the
+          projected heat death of our universe!
+        </p>
       </div>
     </div>
 
-    <div id="timer-display">02:00</div>
+    <div id="timer-container">
+      <span class="timer-label">Time to Solve</span>
+      <div id="timer-display">02m:00s</div>
+    </div>
 
     <div id="rules-box">
       <div class="rules-header" onclick="toggleRules()">

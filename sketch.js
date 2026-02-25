@@ -39,10 +39,10 @@ function updateTimerDisplay() {
 
   if (hours > 0) {
     document.getElementById("timer-display").innerText =
-      `${hours}:${minutes}:${seconds}`;
+      `${hours}h:${minutes}m:${seconds}s`;
   } else {
     document.getElementById("timer-display").innerText =
-      `${minutes}:${seconds}`;
+      `${minutes}m:${seconds}s`;
   }
 
   if (timeLeft <= 15 && timeLeft > 0) {
