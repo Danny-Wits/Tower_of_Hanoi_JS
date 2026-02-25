@@ -3,13 +3,13 @@ let intermediate_tower_count = 1;
 let tower_count = intermediate_tower_count + 2;
 let disk_count = 6;
 let tower_height = 300;
-let tower_width = innerWidth > 600 ? 20 : 15;
+let tower_width = innerWidth > 600 ? 40 : 30;
 let animation_speed = 20;
 let best_r = 2;
 let audio_enabled = false;
 let pause_enabled = true;
 let audio;
-let disk_multiplier = innerWidth > 600 ? 30 : 20;
+let disk_multiplier = innerWidth > 600 ? 40 : 30;
 //audio
 function preload() {
   audio = loadSound("move.mp3");
@@ -160,8 +160,8 @@ function reset() {
   towers = [];
   tower_count = intermediate_tower_count + 2;
   tower_height = 300;
-  tower_width = innerWidth > 600 ? 20 : 15;
-  disk_multiplier = innerWidth > 600 ? 30 : 20;
+  tower_width = innerWidth > 600 ? 30 : 25;
+  disk_multiplier = innerWidth > 600 ? 30 : 25;
 
   for (let i = 0; i < tower_count; i++) {
     towers.push(new Tower(i));
